@@ -7,28 +7,29 @@
         "path": "yeswehack-programs",
         "responseMode": "onReceived"
       },
-      "name": "Webhook - Get Programs",
+      "name": "Webhook - Trigger",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
       "position": [200, 300]
     },
     {
-      "id": "readFile",
+      "id": "httpRequest",
       "parameters": {
-        "filePath": "/data/yeswehack/programs.json",
+        "url": "https://api.yeswehack.com/programs?page=1&resultsPerPage=42",
+        "responseFormat": "json",
         "options": {}
       },
-      "name": "Lire le JSON",
-      "type": "n8n-nodes-base.readBinaryFile",
+      "name": "Appel API YesWeHack",
+      "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 1,
       "position": [400, 300]
     },
     {
-      "id": "parseJSON",
+      "id": "transform",
       "parameters": {
-        "functionCode": "const raw = Buffer.from(items[0].binary.data.data, 'base64').toString();\nconst json = JSON.parse(raw);\n\nconst programs = json.items.map(p => ({\n  name: p.title,\n  url: `https://yeswehack.com/programs/${p.slug}`,\n  country: p.country,\n  type: p.type,\n  bounty: !!p.bounty,\n  reward_min: p.bounty_reward_min,\n  reward_max: p.bounty_reward_max,\n  scopes: p.scopes_count,\n  reports: p.reports_count\n}));\n\nreturn [\n  {\n    json: {\n      programs\n    }\n  }\n];"
+        "functionCode": "const programs = items[0].json.items.map(p => ({\n  name: p.title,\n  url: `https://yeswehack.com/programs/${p.slug}`,\n  country: p.country,\n  type: p.type,\n  bounty: !!p.bounty,\n  reward_min: p.bounty_reward_min,\n  reward_max: p.bounty_reward_max,\n  scopes: p.scopes_count,\n  reports: p.reports_count\n}))\n\nreturn [{ json: { programs } }];"
       },
-      "name": "Parser et formater",
+      "name": "Formatter JSON",
       "type": "n8n-nodes-base.function",
       "typeVersion": 1,
       "position": [600, 300]
@@ -48,29 +49,29 @@
     }
   ],
   "connections": {
-    "Webhook - Get Programs": {
+    "Webhook - Trigger": {
       "main": [
         [
           {
-            "node": "Lire le JSON",
+            "node": "Appel API YesWeHack",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Lire le JSON": {
+    "Appel API YesWeHack": {
       "main": [
         [
           {
-            "node": "Parser et formater",
+            "node": "Formatter JSON",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Parser et formater": {
+    "Formatter JSON": {
       "main": [
         [
           {
@@ -81,9 +82,9 @@
         ]
       ]
     }
-  },
+  ],
   "active": true,
   "settings": {},
-  "name": "Tool - YesWeHack API Proxy",
+  "name": "Tool - YesWeHack Live",
   "tags": ["tool", "yeswehack"]
 }
