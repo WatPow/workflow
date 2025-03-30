@@ -1,0 +1,89 @@
+{
+  "nodes": [
+    {
+      "id": "webhook",
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "yeswehack-programs",
+        "responseMode": "onReceived"
+      },
+      "name": "Webhook - Get Programs",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "id": "readFile",
+      "parameters": {
+        "filePath": "/data/yeswehack/programs.json",
+        "options": {}
+      },
+      "name": "Lire le JSON",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [400, 300]
+    },
+    {
+      "id": "parseJSON",
+      "parameters": {
+        "functionCode": "const raw = Buffer.from(items[0].binary.data.data, 'base64').toString();\nconst json = JSON.parse(raw);\n\nreturn json.items.map(p => ({\n  json: {\n    name: p.title,\n    url: `https://yeswehack.com/programs/${p.slug}`,\n    country: p.country,\n    type: p.type,\n    bounty: !!p.bounty,\n    reward_min: p.bounty_reward_min,\n    reward_max: p.bounty_reward_max,\n    scopes: p.scopes_count,\n    reports: p.reports_count\n  }\n}));"
+      },
+      "name": "Parser et formater",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [600, 300]
+    },
+    {
+      "id": "response",
+      "parameters": {
+        "responseMode": "lastNode",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "name": "Retour JSON",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [800, 300]
+    }
+  ],
+  "connections": {
+    "Webhook - Get Programs": {
+      "main": [
+        [
+          {
+            "node": "Lire le JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire le JSON": {
+      "main": [
+        [
+          {
+            "node": "Parser et formater",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser et formater": {
+      "main": [
+        [
+          {
+            "node": "Retour JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  ],
+  "active": true,
+  "settings": {},
+  "name": "Tool - YesWeHack API Proxy",
+  "tags": ["tool", "yeswehack"]
+}
