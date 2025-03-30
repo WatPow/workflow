@@ -4,10 +4,10 @@
       "id": "webhook",
       "parameters": {
         "httpMethod": "GET",
-        "path": "yeswehack-programs",
+        "path": "yeswehack-full",
         "responseMode": "onReceived"
       },
-      "name": "Webhook - Trigger",
+      "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
       "position": [200, 300]
@@ -19,17 +19,17 @@
         "responseFormat": "json",
         "options": {}
       },
-      "name": "Appel API YesWeHack",
+      "name": "Appel API",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 1,
       "position": [400, 300]
     },
     {
-      "id": "transform",
+      "id": "rawForward",
       "parameters": {
-        "functionCode": "const programs = items[0].json.items.map(p => ({\n  name: p.title,\n  url: `https://yeswehack.com/programs/${p.slug}`,\n  country: p.country,\n  type: p.type,\n  bounty: !!p.bounty,\n  reward_min: p.bounty_reward_min,\n  reward_max: p.bounty_reward_max,\n  scopes: p.scopes_count,\n  reports: p.reports_count\n}))\n\nreturn [{ json: { programs } }];"
+        "functionCode": "return [\n  {\n    json: items[0].json\n  }\n];"
       },
-      "name": "Formatter JSON",
+      "name": "Renvoyer Brut",
       "type": "n8n-nodes-base.function",
       "typeVersion": 1,
       "position": [600, 300]
@@ -49,29 +49,29 @@
     }
   ],
   "connections": {
-    "Webhook - Trigger": {
+    "Webhook": {
       "main": [
         [
           {
-            "node": "Appel API YesWeHack",
+            "node": "Appel API",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Appel API YesWeHack": {
+    "Appel API": {
       "main": [
         [
           {
-            "node": "Formatter JSON",
+            "node": "Renvoyer Brut",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Formatter JSON": {
+    "Renvoyer Brut": {
       "main": [
         [
           {
@@ -85,6 +85,6 @@
   ],
   "active": true,
   "settings": {},
-  "name": "Tool - YesWeHack Live",
-  "tags": ["tool", "yeswehack"]
+  "name": "YesWeHack - Full Raw",
+  "tags": ["yeswehack", "raw", "api"]
 }
