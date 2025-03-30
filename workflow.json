@@ -26,7 +26,7 @@
     {
       "id": "parseJSON",
       "parameters": {
-        "functionCode": "const raw = Buffer.from(items[0].binary.data.data, 'base64').toString();\nconst json = JSON.parse(raw);\n\nreturn json.items.map(p => ({\n  json: {\n    name: p.title,\n    url: `https://yeswehack.com/programs/${p.slug}`,\n    country: p.country,\n    type: p.type,\n    bounty: !!p.bounty,\n    reward_min: p.bounty_reward_min,\n    reward_max: p.bounty_reward_max,\n    scopes: p.scopes_count,\n    reports: p.reports_count\n  }\n}));"
+        "functionCode": "const raw = Buffer.from(items[0].binary.data.data, 'base64').toString();\nconst json = JSON.parse(raw);\n\nconst programs = json.items.map(p => ({\n  name: p.title,\n  url: `https://yeswehack.com/programs/${p.slug}`,\n  country: p.country,\n  type: p.type,\n  bounty: !!p.bounty,\n  reward_min: p.bounty_reward_min,\n  reward_max: p.bounty_reward_max,\n  scopes: p.scopes_count,\n  reports: p.reports_count\n}));\n\nreturn [\n  {\n    json: {\n      programs\n    }\n  }\n];"
       },
       "name": "Parser et formater",
       "type": "n8n-nodes-base.function",
@@ -81,7 +81,7 @@
         ]
       ]
     }
-  ],
+  },
   "active": true,
   "settings": {},
   "name": "Tool - YesWeHack API Proxy",
